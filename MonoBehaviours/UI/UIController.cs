@@ -1,78 +1,78 @@
 ﻿using Fungus;
-using KopliSoft.Inventory;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class UIController : MonoBehaviour
+namespace KopliSoft.UI
 {
-    private int guiCounter = 0;
-    private bool inventoryOpened;
-    [SerializeField]
-    private GameObject hero;
-
-    void Start()
+    public class UIController : MonoBehaviour
     {
-        BlockSignals.OnBlockStart += OnBlockStart;
-        BlockSignals.OnBlockEnd += OnBlockEnd;
-        Inventory.InventoryOpen += InventoryOpened;
-        Inventory.AllInventoriesClosed += AllInventoriesClosed;
-    }
+        [SerializeField]
+        private GameObject hero;
+        private int guiCounter = 0;
+        private bool inventoryOpened;
 
-    private void InventoryOpened()
-    {
-        if (!inventoryOpened)
+        void Start()
         {
-            increaseGuiCounter();
-            inventoryOpened = true;
+            BlockSignals.OnBlockStart += OnBlockStart;
+            BlockSignals.OnBlockEnd += OnBlockEnd;
+            Inventory.Inventory.InventoryOpen += InventoryOpened;
+            Inventory.Inventory.AllInventoriesClosed += AllInventoriesClosed;
         }
-    }
 
-    private void AllInventoriesClosed()
-    {
-        if (inventoryOpened)
+        private void InventoryOpened()
         {
-            decreaseGuiCounter();
-            inventoryOpened = false;
+            if (!inventoryOpened)
+            {
+                increaseGuiCounter();
+                inventoryOpened = true;
+            }
         }
-    }
 
-    private void OnBlockStart(Block block)
-    {
-        if (block.BlockName.Equals("Start"))
+        private void AllInventoriesClosed()
         {
-            increaseGuiCounter();
+            if (inventoryOpened)
+            {
+                decreaseGuiCounter();
+                inventoryOpened = false;
+            }
         }
-    }
 
-    private void OnBlockEnd(Block block)
-    {
-        if (block.BlockName.Equals("End"))
+        private void OnBlockStart(Block block)
         {
-            decreaseGuiCounter();
+            if (block.BlockName.Equals("Start"))
+            {
+                increaseGuiCounter();
+            }
         }
-    }
 
-    private void increaseGuiCounter()
-    {
-        guiCounter++;
-        if (guiCounter == 1)
+        private void OnBlockEnd(Block block)
         {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-            Opsive.ThirdPersonController.EventHandler.ExecuteEvent(hero, "OnAllowGameplayInput", false);
+            if (block.BlockName.Equals("End"))
+            {
+                decreaseGuiCounter();
+            }
         }
-    }
 
-    private void decreaseGuiCounter()
-    {
-        guiCounter--;
-        if (guiCounter == 0)
+        private void increaseGuiCounter()
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-            Opsive.ThirdPersonController.EventHandler.ExecuteEvent(hero, "OnAllowGameplayInput", true);
-            Input.ResetInputAxes();
+            guiCounter++;
+            if (guiCounter == 1)
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+                Opsive.ThirdPersonController.EventHandler.ExecuteEvent(hero, "OnAllowGameplayInput", false);
+            }
+        }
+
+        private void decreaseGuiCounter()
+        {
+            guiCounter--;
+            if (guiCounter == 0)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+                Opsive.ThirdPersonController.EventHandler.ExecuteEvent(hero, "OnAllowGameplayInput", true);
+                Input.ResetInputAxes();
+            }
         }
     }
 }

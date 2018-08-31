@@ -3,43 +3,45 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class SeamlessSceneLoader : MonoBehaviour {
-
-    public string sceneName;
-    private bool loaded;
-
-    // Use this for initialization
-    private void OnTriggerEnter(Collider other)
+namespace KopliSoft.SceneControl
+{
+    public class SeamlessSceneLoader : MonoBehaviour
     {
-        if (!loaded)
+        public string sceneName;
+        private bool loaded;
+
+        private void OnTriggerEnter(Collider other)
         {
-            loaded = true;
-            if (!SceneManager.GetSceneByName(sceneName).isLoaded)
+            if (!loaded)
             {
-                StartCoroutine(DoLoadScene());
+                loaded = true;
+                if (!SceneManager.GetSceneByName(sceneName).isLoaded)
+                {
+                    StartCoroutine(DoLoadScene());
+                }
             }
         }
-    }
 
-    IEnumerator DoLoadScene()
-    {
-        yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
-    }
-
-    public void Unload()
-    {
-        if (loaded)
+        IEnumerator DoLoadScene()
         {
-            loaded = false;
-            if (SceneManager.GetSceneByName(sceneName).isLoaded)
+            yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+        }
+
+        public void Unload()
+        {
+            if (loaded)
             {
-                StartCoroutine(DoUnloadScene());
+                loaded = false;
+                if (SceneManager.GetSceneByName(sceneName).isLoaded)
+                {
+                    StartCoroutine(DoUnloadScene());
+                }
             }
         }
-    }
 
-    IEnumerator DoUnloadScene()
-    {
-        yield return SceneManager.UnloadSceneAsync(sceneName); ;
+        IEnumerator DoUnloadScene()
+        {
+            yield return SceneManager.UnloadSceneAsync(sceneName);
+        }
     }
 }
