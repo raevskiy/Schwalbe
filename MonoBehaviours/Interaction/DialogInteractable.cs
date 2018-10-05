@@ -50,7 +50,7 @@ namespace KopliSoft.Interaction
                 if (m_ShouldTurnToInerviewer && navMeshAgent != null)
                 {
                     destination = navMeshAgent.destination;
-                    behaviorTree.enabled = false;
+                    behaviorTree.DisableBehavior();
                     SetDestination(m_InteractorGameObject.transform.position);
                     StartCoroutine(CheckFacingInterviewer());
                 }
@@ -77,7 +77,7 @@ namespace KopliSoft.Interaction
                 EventHandler.ExecuteEvent(m_InteractorGameObject, "OnAnimatorInteractionComplete");
                 if (m_ShouldTurnToInerviewer && navMeshAgent != null)
                 {
-                    behaviorTree.enabled = true;
+                    behaviorTree.EnableBehavior();
                     SetDestination(destination);
                 }
             }

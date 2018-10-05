@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using BehaviorDesigner.Runtime;
 using Opsive.DeathmatchAIKit.AI;
+using Opsive.DeathmatchAIKit.AI.Actions;
 
 namespace KopliSoft.Behaviour
 {
@@ -50,42 +51,49 @@ namespace KopliSoft.Behaviour
 
         public void FollowPlanA()
         {
-            behaviorTree.SetVariableValue("Waypoints", planA);
+            FollowPlan(planA);
         }
 
         public void FollowPlanB()
         {
-            behaviorTree.SetVariableValue("Waypoints", planB);
+            FollowPlan(planB);
         }
 
         public void FollowPlanC()
         {
-            behaviorTree.SetVariableValue("Waypoints", planC);
+            FollowPlan(planC);
         }
 
         public void FollowPlanD()
         {
-            behaviorTree.SetVariableValue("Waypoints", planD);
+            FollowPlan(planD);
         }
 
         public void FollowPlanE()
         {
-            behaviorTree.SetVariableValue("Waypoints", planE);
+            FollowPlan(planE);
         }
 
         public void FollowPlanF()
         {
-            behaviorTree.SetVariableValue("Waypoints", planF);
+            FollowPlan(planF);
         }
 
         public void FollowPlanG()
         {
-            behaviorTree.SetVariableValue("Waypoints", planG);
+            FollowPlan(planG);
         }
 
         public void FollowPlanH()
         {
-            behaviorTree.SetVariableValue("Waypoints", planH);
+            FollowPlan(planH);
+        }
+
+        private void FollowPlan(List<GameObject> plan)
+        {
+            behaviorTree.DisableBehavior();
+            behaviorTree.SetVariableValue("Waypoints", plan);
+            behaviorTree.EnableBehavior();
         }
 
         public void UntrackPlayer()
