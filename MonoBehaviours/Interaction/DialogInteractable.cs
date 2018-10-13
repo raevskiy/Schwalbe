@@ -1,9 +1,9 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Opsive.ThirdPersonController;
 using BehaviorDesigner.Runtime;
 using UnityEngine.AI;
+using KopliSoft.Behaviour;
 
 namespace KopliSoft.Interaction
 {
@@ -18,6 +18,7 @@ namespace KopliSoft.Interaction
         private Fungus.Flowchart flowchart;
 
         private bool inProgress;
+        private BehaviorTreeController behaviorTreeController;
         private BehaviorTree behaviorTree;
         private NavMeshAgent navMeshAgent;
         private Vector3 destination;
@@ -29,6 +30,7 @@ namespace KopliSoft.Interaction
                 flowchart = GameObject.Find("/Fungus/Flowcharts/" + flowchartName).GetComponent<Fungus.Flowchart>();
             }
 
+            behaviorTreeController = GetComponentInParent<BehaviorTreeController>();
             behaviorTree = GetComponentInParent<BehaviorTree>();
             navMeshAgent = GetComponentInParent<NavMeshAgent>();
         }
@@ -41,6 +43,11 @@ namespace KopliSoft.Interaction
                 && !IsInCriminalMode();
         }
 
+        public bool IsInProgress()
+        {
+            return inProgress;
+        }
+
         public override void Interact()
         {
             if (m_Interactor != null && flowchart != null)
@@ -50,7 +57,7 @@ namespace KopliSoft.Interaction
                 if (m_ShouldTurnToInerviewer && navMeshAgent != null)
                 {
                     destination = navMeshAgent.destination;
-                    behaviorTree.DisableBehavior();
+                    DisableBehavior();
                     SetDestination(m_InteractorGameObject.transform.position);
                     StartCoroutine(CheckFacingInterviewer());
                 }
@@ -77,19 +84,39 @@ namespace KopliSoft.Interaction
                 EventHandler.ExecuteEvent(m_InteractorGameObject, "OnAnimatorInteractionComplete");
                 if (m_ShouldTurnToInerviewer && navMeshAgent != null)
                 {
-                    behaviorTree.EnableBehavior();
+                    EnableBehavior();
                     SetDestination(destination);
                 }
             }
         }
 
+        private void EnableBehavior()
+        {
+            if (behaviorTreeController != null)
+            {
+                behaviorTreeController.EnableBehavior();
+            }
+            else
+            {
+                behaviorTree.EnableBehavior();
+            }
+        }
+
+        private void DisableBehavior()
+        {
+            if (behaviorTreeController != null)
+            {
+                behaviorTreeController.DisableBehavior();
+            }
+            else
+            {
+                behaviorTree.DisableBehavior();
+            }
+        }
+
         protected void SetDestination(Vector3 destination)
         {
-#if UNITY_5_1 || UNITY_5_2 || UNITY_5_3 || UNITY_5_4 || UNITY_5_5
-            navMeshAgent.Resume();
-#else
             navMeshAgent.isStopped = false;
-#endif
             navMeshAgent.SetDestination(destination);
         }
     }

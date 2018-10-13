@@ -1,13 +1,11 @@
-﻿using System.Collections;
+﻿using BehaviorDesigner.Runtime;
+using Opsive.DeathmatchAIKit.AI;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using BehaviorDesigner.Runtime;
-using Opsive.DeathmatchAIKit.AI;
-using Opsive.DeathmatchAIKit.AI.Actions;
-
 namespace KopliSoft.Behaviour
 {
-    public class WaypointSwitch : MonoBehaviour
+    public class BehaviorTreeController : MonoBehaviour
     {
         public List<GameObject> planA;
         public List<GameObject> planB;
@@ -28,6 +26,7 @@ namespace KopliSoft.Behaviour
         private BehaviorTree behaviorTree;
         private DeathmatchAgent deathmatchAgent;
         private bool trackedTargetFound;
+        private int disableBehaviorCounter = 0;
 
         void Start()
         {
@@ -91,9 +90,36 @@ namespace KopliSoft.Behaviour
 
         private void FollowPlan(List<GameObject> plan)
         {
-            behaviorTree.DisableBehavior();
+            DisableBehavior();
+            StartCoroutine(SetWaypoints(plan));
+        }
+
+        IEnumerator SetWaypoints(List<GameObject> plan)
+        {
+            while (behaviorTree.ExecutionStatus == BehaviorDesigner.Runtime.Tasks.TaskStatus.Running)
+            {
+                yield return new WaitForSeconds(.1f);
+            }
             behaviorTree.SetVariableValue("Waypoints", plan);
-            behaviorTree.EnableBehavior();
+            EnableBehavior();
+        }
+
+        public void EnableBehavior()
+        {
+            disableBehaviorCounter--;
+            if (disableBehaviorCounter == 0)
+            {
+                behaviorTree.EnableBehavior();
+            }
+        }
+
+        public void DisableBehavior()
+        {
+            if (disableBehaviorCounter == 0)
+            {
+                behaviorTree.DisableBehavior();
+            }
+            disableBehaviorCounter++;
         }
 
         public void UntrackPlayer()
@@ -107,3 +133,4 @@ namespace KopliSoft.Behaviour
         }
     }
 }
+
