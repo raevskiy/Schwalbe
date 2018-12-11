@@ -18,6 +18,7 @@ namespace KopliSoft.Interaction
         {
             if (!cutscenePlayed && other.gameObject == target)
             {
+                playableDirector.gameObject.SetActive(true);
                 playableDirector.enabled = true;
                 cutscenePlayed = true;
             }

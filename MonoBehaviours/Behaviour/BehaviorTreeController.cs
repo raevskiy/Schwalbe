@@ -3,10 +3,20 @@ using Opsive.DeathmatchAIKit.AI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AI;
+using UnityEngine.Events;
+
 namespace KopliSoft.Behaviour
 {
+    [System.Serializable]
+    public class TrackBlueTeamEvent : UnityEvent<string, string>
+    {
+    }
+
     public class BehaviorTreeController : MonoBehaviour
     {
+        public static TrackBlueTeamEvent trackBlueTeam = new TrackBlueTeamEvent();
+
         public List<GameObject> planA;
         public List<GameObject> planB;
         public List<GameObject> planC;
@@ -22,21 +32,27 @@ namespace KopliSoft.Behaviour
         private Fungus.Flowchart flowchart;
         [SerializeField]
         protected GameObject trackedTarget;
+        [SerializeField]
+        private string characterName;
 
         private BehaviorTree behaviorTree;
         private DeathmatchAgent deathmatchAgent;
+        private NavMeshAgent navMeshAgent;
         private bool trackedTargetFound;
         private int disableBehaviorCounter = 0;
-
+        
         void Start()
         {
             behaviorTree = GetComponent<BehaviorTree>();
             deathmatchAgent = GetComponent<DeathmatchAgent>();
+            navMeshAgent = GetComponent<NavMeshAgent>();
 
             if (flowchart == null && flowchartName != null && flowchartName.Trim().Length != 0)
             {
                 flowchart = GameObject.Find("/Fungus/Flowcharts/" + flowchartName).GetComponent<Fungus.Flowchart>();
             }
+
+            trackBlueTeam.AddListener(TrackTargetsInLayers);
         }
 
         void Update()
@@ -88,6 +104,16 @@ namespace KopliSoft.Behaviour
             FollowPlan(planH);
         }
 
+        public void GoToBan(GameObject ban)
+        {
+            DisableBehavior();
+            List<GameObject> gameObjects = new List<GameObject>
+            {
+                ban
+            };
+            StartCoroutine(SetWaypoints(gameObjects));
+        }
+
         private void FollowPlan(List<GameObject> plan)
         {
             DisableBehavior();
@@ -100,7 +126,9 @@ namespace KopliSoft.Behaviour
             {
                 yield return new WaitForSeconds(.1f);
             }
+            
             behaviorTree.SetVariableValue("Waypoints", plan);
+            
             EnableBehavior();
         }
 
@@ -131,6 +159,26 @@ namespace KopliSoft.Behaviour
         {
             deathmatchAgent.TargetLayerMask = LayerMask.GetMask("Player");
         }
+
+        public void TrackTargetsInLayers(string layersCsv)
+        {
+            string[] layers = layersCsv.Split(',');
+            deathmatchAgent.TargetLayerMask = LayerMask.GetMask(layers);
+        }
+
+        private void TrackTargetsInLayers(string characterName, string layersCsv)
+        {
+            if (characterName.Equals(this.characterName))
+            {
+                TrackTargetsInLayers(layersCsv);
+            }
+        }
+
+        public void SendTrackTargetsInLayersEvent(string characterName, string layersCsv)
+        {
+            trackBlueTeam.Invoke(characterName, layersCsv);
+        }
+
     }
 }
 
