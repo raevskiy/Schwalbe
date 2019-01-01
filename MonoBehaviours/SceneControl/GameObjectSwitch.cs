@@ -1,9 +1,5 @@
 ﻿using KopliSoft.Behaviour;
-using Opsive.ThirdPersonController;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace KopliSoft.SceneControl
 {
@@ -50,10 +46,7 @@ namespace KopliSoft.SceneControl
             for (int i = 0; i < charactersToBan.Length; i++)
             {
                 BehaviorTreeController character = charactersToBan[i];
-                character.GoToBan(ban);
-                Vector3 position = ban.transform.position + Vector3.forward * i;
-                NavMeshAgent navMeshAgent = character.GetComponent<NavMeshAgent>();
-                navMeshAgent.Warp(position);
+                character.TeleportToBan(ban, Vector3.forward * i);
             }
         }
     }

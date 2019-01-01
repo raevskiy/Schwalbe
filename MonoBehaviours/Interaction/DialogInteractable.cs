@@ -4,6 +4,7 @@ using Opsive.ThirdPersonController;
 using BehaviorDesigner.Runtime;
 using UnityEngine.AI;
 using KopliSoft.Behaviour;
+using KopliSoft.Game;
 
 namespace KopliSoft.Interaction
 {
@@ -16,9 +17,12 @@ namespace KopliSoft.Interaction
         protected string flowchartName;
         [SerializeField]
         private Fungus.Flowchart flowchart;
+        [SerializeField]
+        private bool canTalkIfDead;
 
         private bool inProgress;
         private BehaviorTreeController behaviorTreeController;
+        private CustomHealth health;
         private BehaviorTree behaviorTree;
         private NavMeshAgent navMeshAgent;
         private Vector3 destination;
@@ -31,6 +35,7 @@ namespace KopliSoft.Interaction
             }
 
             behaviorTreeController = GetComponentInParent<BehaviorTreeController>();
+            health = GetComponentInParent<CustomHealth>();
             behaviorTree = GetComponentInParent<BehaviorTree>();
             navMeshAgent = GetComponentInParent<NavMeshAgent>();
         }
@@ -40,7 +45,8 @@ namespace KopliSoft.Interaction
             return !inProgress
                 && m_Interactor != null
                 && flowchart != null
-                && !IsInCriminalMode();
+                && !IsInCriminalMode()
+                && (canTalkIfDead || health != null && health.CurrentHealth > 0);
         }
 
         public bool IsInProgress()
@@ -54,7 +60,7 @@ namespace KopliSoft.Interaction
             {
                 inProgress = true;
                 flowchart.ExecuteBlock("Start");
-                if (m_ShouldTurnToInerviewer && navMeshAgent != null)
+                if (health.CurrentHealth > 0 && m_ShouldTurnToInerviewer && navMeshAgent != null)
                 {
                     destination = navMeshAgent.destination;
                     DisableBehavior();
@@ -67,8 +73,8 @@ namespace KopliSoft.Interaction
 
         IEnumerator CheckFacingInterviewer()
         {
-            Vector3 dir = Vector3.ProjectOnPlane(m_InteractorGameObject.transform.position - transform.parent.position, Vector3.up).normalized;
-            while (Vector3.Dot(transform.forward, dir) < 0.9f)
+            Vector3 dir = Vector3.ProjectOnPlane(m_InteractorGameObject.transform.position - navMeshAgent.transform.position, Vector3.up).normalized;
+            while (Vector3.Dot(navMeshAgent.transform.forward, dir) < 0.9f)
             {
                 yield return new WaitForSeconds(.1f);
             }
@@ -82,7 +88,7 @@ namespace KopliSoft.Interaction
                 Fungus.BlockSignals.OnBlockEnd -= OnBlockEnd;
                 inProgress = false;
                 EventHandler.ExecuteEvent(m_InteractorGameObject, "OnAnimatorInteractionComplete");
-                if (m_ShouldTurnToInerviewer && navMeshAgent != null)
+                if (health.CurrentHealth > 0 && m_ShouldTurnToInerviewer && navMeshAgent != null)
                 {
                     EnableBehavior();
                     SetDestination(destination);

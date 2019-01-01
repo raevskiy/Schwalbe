@@ -9,13 +9,13 @@ using UnityEngine.Events;
 namespace KopliSoft.Behaviour
 {
     [System.Serializable]
-    public class TrackBlueTeamEvent : UnityEvent<string, string>
+    public class TrackEvent : UnityEvent<string, string>
     {
     }
 
     public class BehaviorTreeController : MonoBehaviour
     {
-        public static TrackBlueTeamEvent trackBlueTeam = new TrackBlueTeamEvent();
+        public static TrackEvent trackEvent = new TrackEvent();
 
         public List<GameObject> planA;
         public List<GameObject> planB;
@@ -52,7 +52,7 @@ namespace KopliSoft.Behaviour
                 flowchart = GameObject.Find("/Fungus/Flowcharts/" + flowchartName).GetComponent<Fungus.Flowchart>();
             }
 
-            trackBlueTeam.AddListener(TrackTargetsInLayers);
+            trackEvent.AddListener(TrackTargetsInLayers);
         }
 
         void Update()
@@ -114,6 +114,13 @@ namespace KopliSoft.Behaviour
             StartCoroutine(SetWaypoints(gameObjects));
         }
 
+        public void TeleportToBan(GameObject ban, Vector3 offset)
+        {
+            GoToBan(ban);
+            Vector3 position = ban.transform.position + offset;
+            navMeshAgent.Warp(position);
+        }
+
         private void FollowPlan(List<GameObject> plan)
         {
             DisableBehavior();
@@ -150,7 +157,7 @@ namespace KopliSoft.Behaviour
             disableBehaviorCounter++;
         }
 
-        public void UntrackPlayer()
+        public void UntrackEverything()
         {
             deathmatchAgent.TargetLayerMask = new LayerMask();
         }
@@ -176,7 +183,7 @@ namespace KopliSoft.Behaviour
 
         public void SendTrackTargetsInLayersEvent(string characterName, string layersCsv)
         {
-            trackBlueTeam.Invoke(characterName, layersCsv);
+            trackEvent.Invoke(characterName, layersCsv);
         }
 
     }
