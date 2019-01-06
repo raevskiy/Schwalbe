@@ -8,7 +8,7 @@ namespace KopliSoft.Interaction
     public class CutsceneTrigger : MonoBehaviour
     {
         [SerializeField]
-        private GameObject target;
+        private GameObject cutsceneInitiator;
         [SerializeField]
         private PlayableDirector playableDirector;
 
@@ -16,7 +16,7 @@ namespace KopliSoft.Interaction
 
         private void OnTriggerEnter(Collider other)
         {
-            if (!cutscenePlayed && other.gameObject == target)
+            if (!cutscenePlayed && other.gameObject == cutsceneInitiator)
             {
                 playableDirector.gameObject.SetActive(true);
                 playableDirector.enabled = true;

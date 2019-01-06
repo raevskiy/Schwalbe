@@ -1,4 +1,5 @@
 ﻿using KopliSoft.Behaviour;
+using System;
 using UnityEngine;
 
 namespace KopliSoft.SceneControl
@@ -10,9 +11,6 @@ namespace KopliSoft.SceneControl
         [SerializeField]
         private string[] objectsToActivate;
         [SerializeField]
-        [Tooltip("Should be a child of every activated/deactivated object. Used to overcome stupid limitation of GameObject.Find, which operates only wit active objects")]
-        private string aggregatorObjectName = "Aggregator";
-        [SerializeField]
         private BehaviorTreeController[] charactersToBan;
         [SerializeField]
         private GameObject ban;
@@ -21,7 +19,7 @@ namespace KopliSoft.SceneControl
         {
             foreach (string objectName in objectsToDeactivate)
             {
-                GameObject gameObject = GameObject.Find(objectName);
+                GameObject gameObject = DoFind(objectName);
                 if (gameObject != null)
                 {
                     SeamlessSceneLoader loader = gameObject.GetComponentInChildren<SeamlessSceneLoader>();
@@ -30,24 +28,35 @@ namespace KopliSoft.SceneControl
                         loader.Unload();
                     }
 
-                    gameObject.transform.Find(aggregatorObjectName).gameObject.SetActive(false);
+                    gameObject.SetActive(false);
                 }
             }
 
             foreach (string objectName in objectsToActivate)
             {
-                GameObject gameObject = GameObject.Find(objectName);
+                GameObject gameObject = DoFind(objectName);
                 if (gameObject != null)
                 {
-                    gameObject.transform.Find(aggregatorObjectName).gameObject.SetActive(true);
+                    gameObject.SetActive(true);
                 }
             }
 
             for (int i = 0; i < charactersToBan.Length; i++)
             {
                 BehaviorTreeController character = charactersToBan[i];
-                character.TeleportToBan(ban, Vector3.forward * i);
+                if (character.isActiveAndEnabled)
+                {
+                    character.TeleportToBan(ban, Vector3.forward * i);
+                }
             }
+        }
+
+        private GameObject DoFind(string objectPath)
+        {
+            string[] tokens = objectPath.Split(new char[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+            string pathToParent = "/" + string.Join("/", tokens, 0, tokens.Length - 1);
+            GameObject parentGameObject = GameObject.Find(pathToParent);
+            return parentGameObject.transform.Find(tokens[tokens.Length - 1]).gameObject;
         }
     }
 }

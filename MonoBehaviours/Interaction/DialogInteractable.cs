@@ -46,7 +46,12 @@ namespace KopliSoft.Interaction
                 && m_Interactor != null
                 && flowchart != null
                 && !IsInCriminalMode()
-                && (canTalkIfDead || health != null && health.CurrentHealth > 0);
+                && (canTalkIfDead || health == null || isAlive());
+        }
+
+        private bool isAlive()
+        {
+            return health != null && health.CurrentHealth > 0;
         }
 
         public bool IsInProgress()
@@ -60,7 +65,7 @@ namespace KopliSoft.Interaction
             {
                 inProgress = true;
                 flowchart.ExecuteBlock("Start");
-                if (health.CurrentHealth > 0 && m_ShouldTurnToInerviewer && navMeshAgent != null)
+                if (m_ShouldTurnToInerviewer && navMeshAgent != null && isAlive())
                 {
                     destination = navMeshAgent.destination;
                     DisableBehavior();
@@ -88,7 +93,7 @@ namespace KopliSoft.Interaction
                 Fungus.BlockSignals.OnBlockEnd -= OnBlockEnd;
                 inProgress = false;
                 EventHandler.ExecuteEvent(m_InteractorGameObject, "OnAnimatorInteractionComplete");
-                if (health.CurrentHealth > 0 && m_ShouldTurnToInerviewer && navMeshAgent != null)
+                if (m_ShouldTurnToInerviewer && navMeshAgent != null && isAlive())
                 {
                     EnableBehavior();
                     SetDestination(destination);
